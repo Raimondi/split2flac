@@ -40,6 +40,8 @@ TMPPIC="${HOME}/.split2flac_cover.jpg"
 FAILED="split_failed.txt"
 
 NOSUBDIRS=0
+IMPORT=0
+IMPORT_CMD="beet import"
 NOPIC=0
 REMOVE=0
 NOCOLORS=0
@@ -77,6 +79,7 @@ Splits one big \${cU}APE/FLAC/WV/WAV\$cZ\$cG audio image (or a collection) into 
 Usage: \${cZ}split2\${FORMAT} [\${cU}OPTIONS\$cZ] \${cU}FILE\$cZ [\${cU}OPTIONS\$cZ]\$cZ
        \${cZ}split2\${FORMAT} [\${cU}OPTIONS\$cZ] \${cU}DIR\$cZ  [\${cU}OPTIONS\$cZ]\$cZ
          \$cG-p\$cZ                    - dry run
+         \$cG-i\$cZ                    - launch 'beet import' after
          \$cG-o \${cU}DIRECTORY\$cZ        \$cR*\$cZ - set output directory (current is \$cP\${DIR}\$cZ)
          \$cG-of \${cU}'PATTERN'\$cZ       \$cR*\$cZ - use specific output naming pattern (current is \$cP'\${OUTPATTERN}'\$cZ)
          \$cG-cue \${cU}FILE\$cZ             - use file as a cue sheet (does not work with \${cU}DIR\$cZ)
@@ -171,6 +174,7 @@ while [ "$1" ]; do
 		-d)			 NOSUBDIRS=0;;
 		-nd)		 NOSUBDIRS=1;;
 		-p)			 DRY=1;;
+		-i)			 IMPORT=1;;
 		-D)			 REMOVE=1;;
 		-nD)		 REMOVE=0;;
 		-F)			 FORCE=1;;
@@ -685,6 +689,20 @@ split_file () {
 			eval "for i in ${COPYMASKS}; do \
 					test -r/\"${SDIR}/\$i\" && \
 					cp -r \"${SDIR}/\$i\" \"\${OUT}/\"; done"
+		fi
+	fi
+
+	# import files
+	if [ ${IMPORT} -eq 1 ]; then
+		$msg "\n${cG}Importing files:$cZ\n"
+		$IMPORT_CMD "${OUT}"
+		if [ $? -eq 0 ]; then
+			echo -n "Do you want to delete splited files? [Y/n] > "
+			read YEP
+
+			[ -z "${YEP}" -o "${YEP}" = "y" -o "${YEP}" = "Y" ] && rm -rf "${DIR_ARTIST}"
+		else
+			$msg "${cR}Failed to import files$cZ\n"
 		fi
 	fi
 
