@@ -15,7 +15,7 @@ _split2flac () {
       -o)
         _filedir -d
         ;;
-      -of|-e|-enca|-C|-cs)
+      -of|-e|-enca|-C|-cs|-y)
         # no completion, wait for user input
         ;;
       -cue)

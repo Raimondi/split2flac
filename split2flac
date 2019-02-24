@@ -53,6 +53,7 @@ OUTPATTERN="@artist/{@year - }@album/@track - @title.@ext"
 COPYMASKS="[Cc]overs \*.log \*.txt \*.jpg \*.cbr"
 COPYFILES=1
 ENCA_ARGS=""
+ANSWER_YES=0
 
 # codecs default arguments
 ENCARGS_flac="-8"
@@ -104,6 +105,7 @@ Usage: \${cZ}split2\${FORMAT} [\${cU}OPTIONS\$cZ] \${cU}FILE\$cZ [\${cU}OPTIONS\
          \$cG-g\$cZ                  \$cR*\$cZ - adjust audio gain
          \$cG-ng\$cZ                 \$cR*\$cZ - do not adjust audio gain (default)
          \$cG-s\$cZ                    - save configuration to \$cP\"\${CONFIG}\"\$cZ
+         \$cG-y\$cZ                    - answer yes to all question
          \$cG-h\$cZ                    - print this message
          \$cG-v\$cZ                    - print version
 
@@ -183,6 +185,7 @@ while [ "$1" ]; do
 		-g)			 REPLAY_GAIN=1;;
 		-ng)		 REPLAY_GAIN=0;;
 		-s)			 SAVE=1;;
+        -y)          ANSWER_YES=1;;
 		-h|--help|-help) eval "$msg \"${HELP}\""; exit 0;;
 		-v|--version)
 			$msg "split2${FORMAT} version: ${VERSION}\n\n";
@@ -376,7 +379,10 @@ split_file () {
 			|| emsg "Unable to convert cue sheet from ${CHARSET} to utf-8\n"
 
 		echo -n "Do you whant to auto detect charset? [Y/n] > "
-		read YEP
+        YEP="y"
+        if [ ${ANSWER_YES} -eq 0 ]; then
+		    read YEP
+        fi
 		if [ -z "${YEP}" -o "${YEP}" = "y" -o "${YEP}" = "Y" ]; then
 			CHARSET=`file -b --mime-encoding "${CUE}"`
 			echo "Charset detected : ${CHARSET}"
@@ -392,7 +398,10 @@ split_file () {
 					iconv -f "${CHARSET}" -t utf-8 "${CUE}" || continue
 
 					echo -n "Is this right? [Y/n] > "
-					read YEP
+                    YEP="y"
+                    if [ ${ANSWER_YES} -eq 0 ]; then
+                        read YEP
+                    fi
 					[ -z "${YEP}" -o "${YEP}" = "y" -o "${YEP}" = "Y" ] && break
 				done
 
@@ -719,8 +728,10 @@ split_file () {
 		$IMPORT_CMD "${OUT}"
 		if [ $? -eq 0 ]; then
 			echo -n "Do you want to delete splited files? [Y/n] > "
-			read YEP
-
+            YEP="y"
+            if [ ${ANSWER_YES} -eq 0 ]; then
+                read YEP
+            fi
 			[ -z "${YEP}" -o "${YEP}" = "y" -o "${YEP}" = "Y" ] && rm -rf "${DIR_ARTIST}"
 		else
 			$msg "${cR}Failed to import files$cZ\n"
@@ -735,7 +746,10 @@ split_file () {
 
 		if [ ${FORCE} -ne 1 ]; then
 			echo -n "Are you sure you want to delete original? [y/N] > "
-			read YEP
+            YEP="y"
+            if [ ${ANSWER_YES} -eq 0 ]; then
+                read YEP
+            fi
 		fi
 
 		[ "${YEP}" = "y" -o "${YEP}" = "Y" -o ${FORCE} -eq 1 ] && rm -rf "${FILE}"
