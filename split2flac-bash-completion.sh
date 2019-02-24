@@ -32,6 +32,9 @@ _split2flac () {
       -f)
         COMPREPLY=( $(compgen -W "${formats}" -- ${cur}) )
         ;;
+      -i)
+        _filedir
+        ;;
       *)
         _filedir
         ;;
