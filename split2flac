@@ -337,9 +337,10 @@ split_file () {
 
 	# search for a cue sheet if not specified
 	if [ -z "${CUE}" ]; then
-		NB_CUE=`ls *.cue | wc -l`;
+        FILEDIR=`dirname "${FILE}"`
+		NB_CUE=`find "${FILEDIR}" -name "*.cue" | wc -l`;
 		if [ "${NB_CUE}" -eq 1 ]; then
-			CUE=`ls *.cue`
+			CUE=`find "${FILEDIR}" -name "*.cue"`
 		elif [ "${NB_CUE}" -gt 1 ]; then
 			CUE="${FILE}.cue"
 			if [ ! -r "${CUE}" ]; then
@@ -385,11 +386,11 @@ split_file () {
 				while [ 1 ]; do
 					echo -n "Please enter the charset (or just press ENTER to ignore) > "
 					read CHARSET
-	
+
 					[ -z "${CHARSET}" ] && break
 					$msg "${cG}Converted cue sheet:$cZ\n"
 					iconv -f "${CHARSET}" -t utf-8 "${CUE}" || continue
-	
+
 					echo -n "Is this right? [Y/n] > "
 					read YEP
 					[ -z "${YEP}" -o "${YEP}" = "y" -o "${YEP}" = "Y" ] && break
